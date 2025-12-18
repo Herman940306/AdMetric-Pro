@@ -1,27 +1,45 @@
 """Unit tests for the Excel Formatter module.
 
 Tests cover header formatting, currency formatting, conditional formatting,
-Executive Summary creation, and report generation.
+Executive Summary creation, and report generation for AdMetric Pro.
+
+Business Value:
+    Ensures reliable Excel report generation for client deliverables,
+    preventing formatting errors that could damage agency reputation.
+
+Example:
+    Run these tests with pytest::
+
+        pytest tests/test_excel_formatter.py -v
 """
 
-import pytest
-import pandas as pd
-from pathlib import Path
+import logging
 from datetime import datetime
-from openpyxl import load_workbook
+from pathlib import Path
+
+import pandas as pd
+import pytest
+from openpyxl import Workbook, load_workbook
 from openpyxl.styles import PatternFill
 
 from src.excel_formatter import (
-    generate_timestamped_filename,
-    apply_header_formatting,
-    apply_currency_formatting,
-    apply_conditional_formatting,
-    create_executive_summary,
-    generate_report,
+    CPC_THRESHOLD,
     HEADER_FILL,
     HIGH_CPC_FILL,
-    CPC_THRESHOLD,
+    PERCENTAGE_FORMAT,
+    ZAR_FORMAT,
+    apply_conditional_formatting,
+    apply_currency_formatting,
+    apply_header_formatting,
+    apply_percentage_formatting,
+    auto_adjust_column_widths,
+    create_executive_summary,
+    generate_report,
+    generate_timestamped_filename,
 )
+
+# Configure module logger
+logger = logging.getLogger(__name__)
 
 
 class TestGenerateTimestampedFilename:
@@ -48,12 +66,18 @@ class TestGenerateTimestampedFilename:
 
 
 class TestApplyHeaderFormatting:
-    """Test suite for apply_header_formatting function."""
+    """Test suite for apply_header_formatting function.
+
+    Validates:
+        Requirements 4.1, 4.2
+    """
 
     def test_header_has_dark_blue_fill(self, tmp_path: Path) -> None:
-        """Test that headers have dark blue background."""
-        from openpyxl import Workbook
+        """Test that headers have dark blue background.
 
+        Args:
+            tmp_path: Pytest fixture providing temporary directory.
+        """
         wb = Workbook()
         ws = wb.active
         ws["A1"] = "Campaign Name"
@@ -66,8 +90,6 @@ class TestApplyHeaderFormatting:
 
     def test_header_has_white_bold_font(self) -> None:
         """Test that headers have white bold text."""
-        from openpyxl import Workbook
-
         wb = Workbook()
         ws = wb.active
         ws["A1"] = "Test Header"
@@ -77,14 +99,138 @@ class TestApplyHeaderFormatting:
         assert ws["A1"].font.bold is True
         assert ws["A1"].font.color.rgb == "00FFFFFF"
 
+    def test_header_has_centered_alignment(self) -> None:
+        """Test that headers have centered alignment."""
+        wb = Workbook()
+        ws = wb.active
+        ws["A1"] = "Test Header"
+
+        apply_header_formatting(ws)
+
+        assert ws["A1"].alignment.horizontal == "center"
+        assert ws["A1"].alignment.vertical == "center"
+
+    def test_custom_header_row(self) -> None:
+        """Test formatting applied to custom header row."""
+        wb = Workbook()
+        ws = wb.active
+        ws["A2"] = "Header in Row 2"
+
+        apply_header_formatting(ws, header_row=2)
+
+        assert ws["A2"].font.bold is True
+        assert ws["A2"].fill.start_color.rgb == "001F4E79"
+
+
+class TestApplyCurrencyFormatting:
+    """Test suite for apply_currency_formatting function.
+
+    Validates:
+        Requirements 4.3
+    """
+
+    def test_currency_format_applied(self) -> None:
+        """Test that ZAR currency format is applied to specified columns."""
+        df = pd.DataFrame({
+            "campaign_name": ["Test"],
+            "amount_spent": [1500.50],
+            "cpc": [20.0]
+        })
+
+        wb = Workbook()
+        ws = wb.active
+        for col_idx, col_name in enumerate(df.columns, start=1):
+            ws.cell(row=1, column=col_idx, value=col_name)
+        for row_idx, row in enumerate(df.itertuples(index=False), start=2):
+            for col_idx, value in enumerate(row, start=1):
+                ws.cell(row=row_idx, column=col_idx, value=value)
+
+        apply_currency_formatting(ws, ["amount_spent", "cpc"], df)
+
+        # Column 2 (amount_spent) should have ZAR format
+        assert ws.cell(row=2, column=2).number_format == ZAR_FORMAT
+        # Column 3 (cpc) should have ZAR format
+        assert ws.cell(row=2, column=3).number_format == ZAR_FORMAT
+
+    def test_non_currency_columns_unchanged(self) -> None:
+        """Test that non-currency columns are not formatted."""
+        df = pd.DataFrame({
+            "campaign_name": ["Test"],
+            "amount_spent": [1500.50]
+        })
+
+        wb = Workbook()
+        ws = wb.active
+        ws["A1"] = "campaign_name"
+        ws["B1"] = "amount_spent"
+        ws["A2"] = "Test"
+        ws["B2"] = 1500.50
+
+        apply_currency_formatting(ws, ["amount_spent"], df)
+
+        # Column A (campaign_name) should NOT have ZAR format
+        assert ws.cell(row=2, column=1).number_format != ZAR_FORMAT
+
+
+class TestApplyPercentageFormatting:
+    """Test suite for apply_percentage_formatting function.
+
+    Validates:
+        Requirements 4.4
+    """
+
+    def test_percentage_format_applied(self) -> None:
+        """Test that percentage format is applied to CTR column."""
+        df = pd.DataFrame({
+            "campaign_name": ["Test"],
+            "ctr": [2.5]
+        })
+
+        wb = Workbook()
+        ws = wb.active
+        ws["A1"] = "campaign_name"
+        ws["B1"] = "ctr"
+        ws["A2"] = "Test"
+        ws["B2"] = 2.5
+
+        apply_percentage_formatting(ws, ["ctr"], df)
+
+        assert ws.cell(row=2, column=2).number_format == PERCENTAGE_FORMAT
+
+    def test_multiple_rows_formatted(self) -> None:
+        """Test that percentage format is applied to all data rows."""
+        df = pd.DataFrame({
+            "campaign_name": ["A", "B", "C"],
+            "ctr": [1.5, 2.5, 3.5]
+        })
+
+        wb = Workbook()
+        ws = wb.active
+        for col_idx, col_name in enumerate(df.columns, start=1):
+            ws.cell(row=1, column=col_idx, value=col_name)
+        for row_idx, row in enumerate(df.itertuples(index=False), start=2):
+            for col_idx, value in enumerate(row, start=1):
+                ws.cell(row=row_idx, column=col_idx, value=value)
+
+        apply_percentage_formatting(ws, ["ctr"], df)
+
+        for row in range(2, 5):
+            assert ws.cell(row=row, column=2).number_format == PERCENTAGE_FORMAT
+
 
 class TestApplyConditionalFormatting:
-    """Test suite for apply_conditional_formatting function."""
+    """Test suite for apply_conditional_formatting function.
+
+    Validates:
+        Requirements 5.1, 5.2
+    """
 
     def test_high_cpc_rows_highlighted(self, tmp_path: Path) -> None:
-        """Test that rows with CPC > R20.00 are highlighted red."""
-        from openpyxl import Workbook
+        """Test that rows with CPC > R20.00 are highlighted red.
 
+        Args:
+            tmp_path: Pytest fixture providing temporary directory.
+        """
         df = pd.DataFrame({
             "campaign_name": ["Low CPC", "High CPC"],
             "amount_spent": [100.0, 500.0],
@@ -113,8 +259,6 @@ class TestApplyConditionalFormatting:
 
     def test_threshold_boundary(self) -> None:
         """Test that exactly R20.00 is NOT highlighted (only > 20)."""
-        from openpyxl import Workbook
-
         df = pd.DataFrame({
             "campaign_name": ["Exactly 20"],
             "cpc": [20.0]
@@ -132,14 +276,79 @@ class TestApplyConditionalFormatting:
         # Exactly R20.00 should NOT be highlighted
         assert ws.cell(row=2, column=1).fill.start_color.rgb != "00FFC7CE"
 
+    def test_missing_cpc_column_handled(self) -> None:
+        """Test that missing CPC column is handled gracefully."""
+        df = pd.DataFrame({
+            "campaign_name": ["Test"],
+            "amount_spent": [100.0]
+        })
+
+        wb = Workbook()
+        ws = wb.active
+        ws["A1"] = "campaign_name"
+        ws["B1"] = "amount_spent"
+        ws["A2"] = "Test"
+        ws["B2"] = 100.0
+
+        # Should not raise an error
+        apply_conditional_formatting(ws, "cpc", df)
+
+    def test_custom_threshold(self) -> None:
+        """Test conditional formatting with custom threshold."""
+        df = pd.DataFrame({
+            "campaign_name": ["Test"],
+            "cpc": [15.0]
+        })
+
+        wb = Workbook()
+        ws = wb.active
+        ws["A1"] = "campaign_name"
+        ws["B1"] = "cpc"
+        ws["A2"] = "Test"
+        ws["B2"] = 15.0
+
+        # With threshold of 10, this should be highlighted
+        apply_conditional_formatting(ws, "cpc", df, threshold=10.0)
+
+        assert ws.cell(row=2, column=1).fill.start_color.rgb == "00FFC7CE"
+
+
+class TestAutoAdjustColumnWidths:
+    """Test suite for auto_adjust_column_widths function."""
+
+    def test_columns_adjusted(self) -> None:
+        """Test that column widths are adjusted based on content."""
+        wb = Workbook()
+        ws = wb.active
+        ws["A1"] = "Short"
+        ws["B1"] = "This is a much longer header text"
+
+        auto_adjust_column_widths(ws)
+
+        # Column B should be wider than column A
+        assert ws.column_dimensions["B"].width > ws.column_dimensions["A"].width
+
+    def test_max_width_capped(self) -> None:
+        """Test that column width is capped at 50 characters."""
+        wb = Workbook()
+        ws = wb.active
+        ws["A1"] = "A" * 100  # Very long text
+
+        auto_adjust_column_widths(ws)
+
+        # Width should be capped at 50
+        assert ws.column_dimensions["A"].width <= 52  # 50 + 2 padding
+
 
 class TestCreateExecutiveSummary:
-    """Test suite for create_executive_summary function."""
+    """Test suite for create_executive_summary function.
+
+    Validates:
+        Requirements 7.1, 7.2, 7.3, 7.4, 7.5, 7.6
+    """
 
     def test_summary_sheet_created(self) -> None:
         """Test that Executive Summary sheet is created."""
-        from openpyxl import Workbook
-
         df = pd.DataFrame({
             "campaign_name": ["Test"],
             "amount_spent": [1000.0],
@@ -156,8 +365,6 @@ class TestCreateExecutiveSummary:
 
     def test_summary_contains_total_spend(self) -> None:
         """Test that summary displays correct Total Spend."""
-        from openpyxl import Workbook
-
         df = pd.DataFrame({
             "campaign_name": ["A", "B"],
             "amount_spent": [1000.0, 2000.0],
@@ -180,10 +387,56 @@ class TestCreateExecutiveSummary:
 
         assert found_spend, "Total Spend R3,000.00 not found in summary"
 
+    def test_summary_contains_total_impressions(self) -> None:
+        """Test that summary displays correct Total Impressions."""
+        df = pd.DataFrame({
+            "campaign_name": ["A", "B"],
+            "amount_spent": [1000.0, 2000.0],
+            "link_clicks": [50, 100],
+            "impressions": [2500, 5000],
+            "ctr": [2.0, 2.0],
+            "cpc": [20.0, 20.0]
+        })
+
+        wb = Workbook()
+        summary_ws = create_executive_summary(wb, df)
+
+        # Find Total Impressions value (7,500)
+        found_impressions = False
+        for row in summary_ws.iter_rows(min_row=1, max_row=10, max_col=2):
+            for cell in row:
+                if cell.value and "7,500" in str(cell.value):
+                    found_impressions = True
+                    break
+
+        assert found_impressions, "Total Impressions 7,500 not found in summary"
+
+    def test_summary_contains_total_clicks(self) -> None:
+        """Test that summary displays correct Total Clicks."""
+        df = pd.DataFrame({
+            "campaign_name": ["A", "B"],
+            "amount_spent": [1000.0, 2000.0],
+            "link_clicks": [50, 100],
+            "impressions": [2500, 5000],
+            "ctr": [2.0, 2.0],
+            "cpc": [20.0, 20.0]
+        })
+
+        wb = Workbook()
+        summary_ws = create_executive_summary(wb, df)
+
+        # Find Total Clicks value (150)
+        found_clicks = False
+        for row in summary_ws.iter_rows(min_row=1, max_row=10, max_col=2):
+            for cell in row:
+                if cell.value and "150" in str(cell.value):
+                    found_clicks = True
+                    break
+
+        assert found_clicks, "Total Clicks 150 not found in summary"
+
     def test_summary_handles_zero_clicks(self) -> None:
         """Test that summary handles zero clicks without division error."""
-        from openpyxl import Workbook
-
         df = pd.DataFrame({
             "campaign_name": ["Zero Clicks"],
             "amount_spent": [500.0],
@@ -198,12 +451,52 @@ class TestCreateExecutiveSummary:
         summary_ws = create_executive_summary(wb, df)
         assert summary_ws is not None
 
+    def test_summary_handles_zero_impressions(self) -> None:
+        """Test that summary handles zero impressions without division error."""
+        df = pd.DataFrame({
+            "campaign_name": ["Zero Impressions"],
+            "amount_spent": [500.0],
+            "link_clicks": [50],
+            "impressions": [0],
+            "ctr": [0.0],
+            "cpc": [10.0]
+        })
+
+        wb = Workbook()
+        # Should not raise any errors
+        summary_ws = create_executive_summary(wb, df)
+        assert summary_ws is not None
+
+    def test_summary_has_title(self) -> None:
+        """Test that summary has AdMetric Pro title."""
+        df = pd.DataFrame({
+            "campaign_name": ["Test"],
+            "amount_spent": [1000.0],
+            "link_clicks": [50],
+            "impressions": [2500],
+            "ctr": [2.0],
+            "cpc": [20.0]
+        })
+
+        wb = Workbook()
+        summary_ws = create_executive_summary(wb, df)
+
+        assert summary_ws["A1"].value == "AdMetric Pro - Executive Summary"
+
 
 class TestGenerateReport:
-    """Test suite for generate_report function."""
+    """Test suite for generate_report function.
+
+    Validates:
+        Requirements 4.1, 4.2, 4.3, 4.4, 5.1, 5.2, 6.1, 6.2, 6.3, 7.1, 8.1
+    """
 
     def test_report_creates_file(self, tmp_path: Path) -> None:
-        """Test that report generates an Excel file."""
+        """Test that report generates an Excel file.
+
+        Args:
+            tmp_path: Pytest fixture providing temporary directory.
+        """
         df = pd.DataFrame({
             "campaign_name": ["Test Campaign"],
             "amount_spent": [1000.0],
@@ -219,7 +512,11 @@ class TestGenerateReport:
         assert report_path.endswith(".xlsx")
 
     def test_report_has_two_sheets(self, tmp_path: Path) -> None:
-        """Test that report contains Campaign Details and Executive Summary sheets."""
+        """Test that report contains Campaign Details and Executive Summary sheets.
+
+        Args:
+            tmp_path: Pytest fixture providing temporary directory.
+        """
         df = pd.DataFrame({
             "campaign_name": ["Test"],
             "amount_spent": [1000.0],
@@ -236,7 +533,11 @@ class TestGenerateReport:
         assert "Executive Summary" in wb.sheetnames
 
     def test_report_preserves_data(self, tmp_path: Path) -> None:
-        """Test that report preserves campaign data correctly."""
+        """Test that report preserves campaign data correctly.
+
+        Args:
+            tmp_path: Pytest fixture providing temporary directory.
+        """
         df = pd.DataFrame({
             "campaign_name": ["Summer Sale"],
             "amount_spent": [1500.0],
@@ -256,7 +557,11 @@ class TestGenerateReport:
         assert ws["A2"].value == "Summer Sale"
 
     def test_report_applies_conditional_formatting(self, tmp_path: Path) -> None:
-        """Test that high CPC campaigns are highlighted."""
+        """Test that high CPC campaigns are highlighted.
+
+        Args:
+            tmp_path: Pytest fixture providing temporary directory.
+        """
         df = pd.DataFrame({
             "campaign_name": ["Low CPC", "High CPC"],
             "amount_spent": [100.0, 500.0],
@@ -274,7 +579,11 @@ class TestGenerateReport:
         assert ws.cell(row=3, column=1).fill.start_color.rgb == "00FFC7CE"
 
     def test_report_creates_output_directory(self, tmp_path: Path) -> None:
-        """Test that report creates output directory if it doesn't exist."""
+        """Test that report creates output directory if it doesn't exist.
+
+        Args:
+            tmp_path: Pytest fixture providing temporary directory.
+        """
         df = pd.DataFrame({
             "campaign_name": ["Test"],
             "amount_spent": [1000.0],
@@ -289,3 +598,94 @@ class TestGenerateReport:
 
         assert new_dir.exists()
         assert Path(report_path).exists()
+
+    def test_report_filename_format(self, tmp_path: Path) -> None:
+        """Test that report filename follows expected format.
+
+        Args:
+            tmp_path: Pytest fixture providing temporary directory.
+        """
+        df = pd.DataFrame({
+            "campaign_name": ["Test"],
+            "amount_spent": [1000.0],
+            "link_clicks": [50],
+            "impressions": [2500],
+            "ctr": [2.0],
+            "cpc": [20.0]
+        })
+
+        report_path = generate_report(df, str(tmp_path))
+        filename = Path(report_path).name
+
+        assert filename.startswith("AdMetric_Pro_Report_")
+        assert filename.endswith(".xlsx")
+
+    def test_report_headers_formatted(self, tmp_path: Path) -> None:
+        """Test that report headers have proper formatting.
+
+        Args:
+            tmp_path: Pytest fixture providing temporary directory.
+        """
+        df = pd.DataFrame({
+            "campaign_name": ["Test"],
+            "amount_spent": [1000.0],
+            "link_clicks": [50],
+            "impressions": [2500],
+            "ctr": [2.0],
+            "cpc": [20.0]
+        })
+
+        report_path = generate_report(df, str(tmp_path))
+        wb = load_workbook(report_path)
+        ws = wb["Campaign Details"]
+
+        # Check header formatting
+        assert ws["A1"].font.bold is True
+        assert ws["A1"].fill.start_color.rgb == "001F4E79"
+
+    def test_report_currency_formatting(self, tmp_path: Path) -> None:
+        """Test that currency columns have ZAR formatting.
+
+        Args:
+            tmp_path: Pytest fixture providing temporary directory.
+        """
+        df = pd.DataFrame({
+            "campaign_name": ["Test"],
+            "amount_spent": [1500.50],
+            "link_clicks": [50],
+            "impressions": [2500],
+            "ctr": [2.0],
+            "cpc": [30.01]
+        })
+
+        report_path = generate_report(df, str(tmp_path))
+        wb = load_workbook(report_path)
+        ws = wb["Campaign Details"]
+
+        # Column B (Amount Spent) and Column F (CPC) should have ZAR format
+        assert ws.cell(row=2, column=2).number_format == ZAR_FORMAT
+        assert ws.cell(row=2, column=6).number_format == ZAR_FORMAT
+
+    def test_report_multiple_campaigns(self, tmp_path: Path) -> None:
+        """Test report generation with multiple campaigns.
+
+        Args:
+            tmp_path: Pytest fixture providing temporary directory.
+        """
+        df = pd.DataFrame({
+            "campaign_name": ["Campaign A", "Campaign B", "Campaign C"],
+            "amount_spent": [1000.0, 2000.0, 3000.0],
+            "link_clicks": [50, 100, 150],
+            "impressions": [2500, 5000, 7500],
+            "ctr": [2.0, 2.0, 2.0],
+            "cpc": [20.0, 20.0, 20.0]
+        })
+
+        report_path = generate_report(df, str(tmp_path))
+        wb = load_workbook(report_path)
+        ws = wb["Campaign Details"]
+
+        # Verify all campaigns are present
+        assert ws["A2"].value == "Campaign A"
+        assert ws["A3"].value == "Campaign B"
+        assert ws["A4"].value == "Campaign C"

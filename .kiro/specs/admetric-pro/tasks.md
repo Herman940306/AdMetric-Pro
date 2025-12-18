@@ -84,46 +84,50 @@
 
 - [x] 6. Implement Excel Formatter module
 
-
-
-
-  - [ ] 6.1 Create src/excel_formatter.py with core formatting functions
+  - [x] 6.1 Create src/excel_formatter.py with core formatting functions
     - Implement generate_timestamped_filename function
     - Implement apply_header_formatting function (bold, dark blue)
     - Implement apply_currency_formatting function (ZAR format)
-
     - Implement apply_conditional_formatting function (CPC > R20 red highlight)
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 5.1, 5.2, 8.1, 8.2_
-  - [ ] 6.2 Implement Executive Summary sheet creation
-    - Create create_executive_summary function
 
+  - [x] 6.2 Implement Executive Summary sheet creation
+    - Create create_executive_summary function
     - Calculate Total Spend, Total Impressions, Total Clicks
     - Calculate Average CPC and Overall CTR
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6_
-  - [ ] 6.3 Implement generate_report main function
+
+  - [x] 6.3 Implement generate_report main function
     - Orchestrate all formatting functions
     - Write to Excel with openpyxl engine
     - Add logging for success/failure
     - _Requirements: 6.1, 6.2, 6.3, 6.4_
-  - [ ]* 6.4 Write property test for header formatting
+
+  - [x]* 6.4 Write property test for header formatting
     - **Property 4: Header Formatting Consistency**
     - **Validates: Requirements 4.1, 4.2**
-  - [ ]* 6.5 Write property test for currency formatting
+
+  - [x]* 6.5 Write property test for currency formatting
     - **Property 5: Currency Formatting Application**
     - **Validates: Requirements 4.3**
-  - [ ]* 6.6 Write property test for CPC threshold highlighting
+
+  - [x]* 6.6 Write property test for CPC threshold highlighting
     - **Property 6: CPC Threshold Highlighting**
     - **Validates: Requirements 5.1, 5.2**
-  - [ ]* 6.7 Write property test for Excel data round-trip
+
+  - [x]* 6.7 Write property test for Excel data round-trip
     - **Property 7: Excel Data Round-Trip**
     - **Validates: Requirements 6.1, 6.2**
-  - [ ]* 6.8 Write property test for Executive Summary aggregation
+
+  - [x]* 6.8 Write property test for Executive Summary aggregation
     - **Property 8: Executive Summary Aggregation**
     - **Validates: Requirements 7.2, 7.3, 7.4, 7.5, 7.6**
-  - [ ]* 6.9 Write property test for timestamped filename format
+
+  - [x]* 6.9 Write property test for timestamped filename format
     - **Property 9: Timestamped Filename Format**
     - **Validates: Requirements 8.1**
-  - [ ]* 6.10 Write unit tests for excel_formatter module
+
+  - [x]* 6.10 Write unit tests for excel_formatter module
     - Test header formatting applied
     - Test currency formatting applied
     - Test conditional formatting threshold
