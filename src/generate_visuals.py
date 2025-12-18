@@ -1,10 +1,22 @@
 """Visual Generation utility for AdMetric Pro.
 
 This script generates high-quality preview images for the README
-to showcase the tool's output to potential clients.
+to showcase the tool's output to potential clients. These visuals
+serve as marketing assets demonstrating the professional quality
+of AdMetric Pro reports.
 
 Usage:
     python -m src.generate_visuals
+
+Example:
+    >>> from src.generate_visuals import generate_executive_summary_image
+    >>> import pandas as pd
+    >>> df = pd.DataFrame({
+    ...     "amount_spent": [1000.0],
+    ...     "impressions": [5000],
+    ...     "link_clicks": [100]
+    ... })
+    >>> generate_executive_summary_image(df, "output/summary.png")
 """
 
 import logging
@@ -12,7 +24,6 @@ from pathlib import Path
 
 import pandas as pd
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
 from src.csv_reader import read_meta_csv
 from src.metrics import add_metrics_to_dataframe
@@ -34,11 +45,28 @@ def generate_executive_summary_image(df: pd.DataFrame, output_path: str) -> None
     """Generate Executive Summary dashboard preview image.
 
     Creates a clean, professional table showing aggregated metrics
-    that would appear in the Executive Summary sheet.
+    that would appear in the Executive Summary sheet. This image
+    is used in the README to showcase the dashboard output.
 
     Args:
         df: DataFrame with campaign data and calculated metrics.
+            Expected columns: amount_spent, impressions, link_clicks.
         output_path: Path to save the PNG image.
+
+    Returns:
+        None. Writes image file to output_path.
+
+    Raises:
+        KeyError: If required columns are missing from DataFrame.
+        ValueError: If Plotly cannot generate the image.
+
+    Example:
+        >>> df = pd.DataFrame({
+        ...     "amount_spent": [1000.0, 500.0],
+        ...     "impressions": [5000, 2500],
+        ...     "link_clicks": [100, 50]
+        ... })
+        >>> generate_executive_summary_image(df, "docs/assets/summary.png")
     """
     logger.info("Generating Executive Summary preview...")
 
@@ -101,12 +129,33 @@ def generate_report_preview_image(df: pd.DataFrame, output_path: str, top_n: int
     """Generate Campaign Details report preview image.
 
     Creates a preview showing the top campaigns with ZAR formatting
-    and red flag highlighting for high CPC campaigns.
+    and red flag highlighting for high CPC campaigns (CPC > R20.00).
+    This image demonstrates the conditional formatting feature.
 
     Args:
         df: DataFrame with campaign data and calculated metrics.
+            Expected columns: campaign_name, amount_spent, link_clicks,
+            impressions, ctr, cpc.
         output_path: Path to save the PNG image.
         top_n: Number of campaigns to show (default: 10).
+
+    Returns:
+        None. Writes image file to output_path.
+
+    Raises:
+        KeyError: If required columns are missing from DataFrame.
+        ValueError: If Plotly cannot generate the image.
+
+    Example:
+        >>> df = pd.DataFrame({
+        ...     "campaign_name": ["Summer Sale"],
+        ...     "amount_spent": [1000.0],
+        ...     "link_clicks": [50],
+        ...     "impressions": [2500],
+        ...     "ctr": [2.0],
+        ...     "cpc": [20.0]
+        ... })
+        >>> generate_report_preview_image(df, "docs/assets/report.png", top_n=5)
     """
     logger.info("Generating Report preview (top %d campaigns)...", top_n)
 
@@ -181,30 +230,62 @@ def generate_report_preview_image(df: pd.DataFrame, output_path: str, top_n: int
     logger.info("Saved: %s", output_path)
 
 
-def main() -> None:
-    """Generate all visual assets for README."""
+def main() -> int:
+    """Generate all visual assets for README.
+
+    Orchestrates the complete visual generation pipeline:
+    1. Load sample campaign data from mock_data/
+    2. Calculate CTR and CPC metrics
+    3. Generate Executive Summary dashboard image
+    4. Generate Campaign Details report preview image
+
+    Returns:
+        Exit code (0 for success, 1 for error).
+
+    Raises:
+        FileNotFoundError: If mock data file is not found.
+        IOError: If images cannot be written to disk.
+
+    Example:
+        >>> exit_code = main()
+        >>> assert exit_code == 0
+    """
     logger.info("=" * 50)
     logger.info("AdMetric Pro - Visual Generator")
     logger.info("=" * 50)
 
-    # Create output directory
-    assets_dir = Path("docs/assets")
-    assets_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        # Create output directory
+        assets_dir = Path("docs/assets")
+        assets_dir.mkdir(parents=True, exist_ok=True)
 
-    # Load and process data
-    logger.info("Loading mock data...")
-    df = read_meta_csv("mock_data/sample_meta_ads.csv")
-    df = add_metrics_to_dataframe(df)
+        # Load and process data
+        logger.info("Loading mock data...")
+        df = read_meta_csv("mock_data/sample_meta_ads.csv")
+        df = add_metrics_to_dataframe(df)
 
-    # Generate images
-    generate_executive_summary_image(df, str(assets_dir / "dashboard_preview.png"))
-    generate_report_preview_image(df, str(assets_dir / "report_preview.png"))
+        # Generate images
+        generate_executive_summary_image(df, str(assets_dir / "dashboard_preview.png"))
+        generate_report_preview_image(df, str(assets_dir / "report_preview.png"))
 
-    logger.info("=" * 50)
-    logger.info("Visual generation complete!")
-    logger.info("Assets saved to: docs/assets/")
-    logger.info("=" * 50)
+        logger.info("=" * 50)
+        logger.info("Visual generation complete!")
+        logger.info("Assets saved to: docs/assets/")
+        logger.info("=" * 50)
+
+        return 0
+
+    except FileNotFoundError as e:
+        logger.error("Mock data file not found: %s", e)
+        return 1
+    except IOError as e:
+        logger.error("Failed to write image: %s", e)
+        return 1
+    except Exception as e:
+        logger.error("Unexpected error: %s", e)
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    sys.exit(main())

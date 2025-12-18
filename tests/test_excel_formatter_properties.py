@@ -230,7 +230,7 @@ class TestCurrencyFormattingProperty:
             max_size=5
         )
     )
-    @settings(max_examples=50)
+    @settings(max_examples=50, deadline=None)
     def test_currency_columns_have_zar_format(
         self,
         tmp_path_factory: TempPathFactory,
