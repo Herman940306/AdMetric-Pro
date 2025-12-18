@@ -1,0 +1,4 @@
+# file: F:\Marketing-Automation-Tools\AdMetric Pro\src\excel_formatter.py
+# hypothesis_version: 6.148.7
+
+[20.0, 100, '%Y-%m-%d_%H%M', '0.00"%"', '1F4E79', '2E75B6', '666666', 'A', 'A1', 'A1:B1', 'A2', 'A2:B2', 'A4', 'Amount Spent (ZAR)', 'Average CPC', 'B', 'B4', 'CPC', 'CPC (ZAR)', 'CTR (%)', 'Campaign Details', 'Campaign Name', 'D6DCE4', 'Executive Summary', 'FFC7CE', 'FFFFFF', 'Impressions', 'Link Clicks', 'Metric', 'Overall CTR', 'R #,##0.00', 'Saving report to: %s', 'Spend', 'Total Clicks', 'Total Impressions', 'Total Spend', 'Value', 'amount_spent', 'center', 'cpc', 'ctr', 'impressions', 'left', 'link_clicks', 'output', 'right', 'solid', 'thin']

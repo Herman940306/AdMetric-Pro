@@ -57,6 +57,7 @@
 
 - [x] 4. Implement Metrics Calculator module
 
+
   - [x] 4.1 Create src/metrics.py with CTR and CPC calculations
 
     - Implement calculate_ctr function with zero-division protection
@@ -81,15 +82,21 @@
 - [ ] 5. Checkpoint - Review Metrics Calculator
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 6. Implement Excel Formatter module
+- [x] 6. Implement Excel Formatter module
+
+
+
+
   - [ ] 6.1 Create src/excel_formatter.py with core formatting functions
     - Implement generate_timestamped_filename function
     - Implement apply_header_formatting function (bold, dark blue)
     - Implement apply_currency_formatting function (ZAR format)
+
     - Implement apply_conditional_formatting function (CPC > R20 red highlight)
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 5.1, 5.2, 8.1, 8.2_
   - [ ] 6.2 Implement Executive Summary sheet creation
     - Create create_executive_summary function
+
     - Calculate Total Spend, Total Impressions, Total Clicks
     - Calculate Average CPC and Overall CTR
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6_
