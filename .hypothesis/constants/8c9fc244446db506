@@ -1,0 +1,4 @@
+# file: F:\Marketing-Automation-Tools\AdMetric Pro\src\csv_reader.py
+# hypothesis_version: 6.148.7
+
+[0.0, '.csv', 'Amount Spent (ZAR)', 'Campaign Name', 'File not found: %s', 'Impressions', 'Link Clicks', 'amount_spent', 'campaign_name', 'coerce', 'impressions', 'link_clicks']

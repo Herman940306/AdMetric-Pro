@@ -1,0 +1,12 @@
+{
+  "name": "GitHub Readiness Check",
+  "trigger": {
+    "type": "manual"
+  },
+  "actions": [
+    {
+      "type": "sendMessage",
+      "message": "Analyze the current workspace. Check for: 1. Professionalism of comments. 2. Any hardcoded secrets/API keys. 3. Quality of the README. 4. Consistency of the commit message. Give me a 'Green Light' only if this is ready for a client to see on GitHub."
+    }
+  ]
+}

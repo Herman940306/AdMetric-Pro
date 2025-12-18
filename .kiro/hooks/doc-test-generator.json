@@ -1,0 +1,13 @@
+{
+  "name": "Doc & Test Generator",
+  "trigger": {
+    "type": "fileSaved",
+    "filePattern": "src/**/*.py"
+  },
+  "actions": [
+    {
+      "type": "sendMessage",
+      "message": "When I save a Python script, automatically check if the docstrings are complete and suggest a unit test in a separate tests/ folder to verify the data logic."
+    }
+  ]
+}

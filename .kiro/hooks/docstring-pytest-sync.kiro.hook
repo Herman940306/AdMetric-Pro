@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "name": "Doc & Test Generator",
+  "description": "Automatically synchronizes Google-style docstrings with corresponding pytest test files when Python source files are edited. Ensures test cases stay aligned with documented function signatures, parameters, and expected behaviors.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "**/*.py",
+      "src/**/*.py"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "When this Python file is saved:\n\n1. Analyze all functions and classes. Add or update Google-style docstrings (including Args, Returns, and Raises).\n\n2. Type Hints: Add Python type hints to all function signatures to ensure code clarity.\n\n3. Sync Tests: Locate or create a corresponding test file in the tests/ directory (e.g., tests/test_[filename].py).\n\n4. Generate Cases: For any new logic, write a pytest function. If the code handles data, use a dictionary to mock a Meta Ads CSV and verify the math for CPC and CTR.\n\nProfessionalism: Ensure no debug 'print' statements remain; replace them with proper logging if necessary."
+  }
+}

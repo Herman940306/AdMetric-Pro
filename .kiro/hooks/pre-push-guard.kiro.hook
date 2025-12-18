@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "name": "GitHub Readiness Check",
+  "description": "Analyze all files staged for commit.\n\n1. Security: Scan for hardcoded secrets, API keys, or tokens.\n\n2. Professionalism: Review all comments and docstrings. Ensure they are written in a professional, client-facing tone. Remove any 'TODO', 'FIXME', or slang.\n\n3. Documentation: Check that the README.md follows professional standards (Problem, Solution, Setup, Usage).\n\n4. Git Standard: Verify the proposed commit message follows 'Conventional Commits' (e.g., feat: ..., fix: ..., docs: ...).\n\nOnly provide a 'GREEN LIGHT: READY FOR CLIENT' if all standards are met. Otherwise, list specific fixes.",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "git diff --cached --name-only | xargs -I {} sh -c 'echo \"Checking: {}\" && grep -nE \"(TODO|FIXME|HACK|print\\(|console\\.log|password|secret|key|token|sk-)\" {}'"
+  },
+  "workspaceFolderName": "AdMetric Pro",
+  "shortName": "pre-push-guard"
+}
