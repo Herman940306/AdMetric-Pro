@@ -189,6 +189,19 @@ class TestMainIntegration:
         finally:
             os.unlink(invalid_csv)
 
+    def test_main_empty_csv_returns_error(self, temp_output_dir):
+        """Test that empty CSV (headers only, no data) returns exit code 1."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
+            f.write("Campaign Name,Amount Spent (ZAR),Link Clicks,Impressions\n")
+            empty_csv = f.name
+
+        try:
+            with patch("sys.argv", ["main", empty_csv, "--output", temp_output_dir]):
+                exit_code = main()
+            assert exit_code == 1
+        finally:
+            os.unlink(empty_csv)
+
 
 class TestMainMetricsVerification:
     """Tests verifying metric calculations match expected values."""

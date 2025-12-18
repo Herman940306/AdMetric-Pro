@@ -143,37 +143,38 @@ def main() -> int:
 
         # Check for empty data
         if len(df_with_metrics) == 0:
-            print("\n" + "=" * 60)
-            print("[WARNING] No campaigns found in file.")
-            print("Please check your Meta export and ensure it contains data.")
-            print("=" * 60)
+            logger.warning("=" * 60)
+            logger.warning("No campaigns found in file.")
+            logger.warning("Please check your Meta export and ensure it contains data.")
+            logger.warning("=" * 60)
             return 1
 
         report_path = generate_report(df_with_metrics, args.output)
 
-        # Print Success Summary to terminal
-        print("\n" + "=" * 60)
-        print(f"[SUCCESS] Report generated: {Path(report_path).name}")
-        print(f"[SUMMARY] {len(df_with_metrics)} Campaigns processed. {high_cpc_count} Red Flags found.")
-        print("=" * 60)
-        print(f"\nOutput: {report_path}")
+        # Log Success Summary
+        logger.info("=" * 60)
+        logger.info("[SUCCESS] Report generated: %s", Path(report_path).name)
+        logger.info("[SUMMARY] %d Campaigns processed. %d Red Flags found.",
+                    len(df_with_metrics), high_cpc_count)
+        logger.info("=" * 60)
+        logger.info("Output: %s", report_path)
 
         return 0
 
     except FileNotFoundError as e:
-        print(f"\n[ERROR] File not found: {e}")
-        print("Please check the file path and try again.")
+        logger.error("File not found: %s", e)
+        logger.error("Please check the file path and try again.")
         return 1
     except ValueError as e:
-        print(f"\n[ERROR] Data validation error: {e}")
-        print("Please ensure your CSV has the required columns:")
-        print("  - Campaign Name")
-        print("  - Amount Spent (ZAR)")
-        print("  - Link Clicks")
-        print("  - Impressions")
+        logger.error("Data validation error: %s", e)
+        logger.error("Please ensure your CSV has the required columns:")
+        logger.error("  - Campaign Name")
+        logger.error("  - Amount Spent (ZAR)")
+        logger.error("  - Link Clicks")
+        logger.error("  - Impressions")
         return 1
     except IOError as e:
-        print(f"\n[ERROR] Failed to write report: {e}")
+        logger.error("Failed to write report: %s", e)
         return 1
     except Exception as e:
         logger.error("Unexpected error: %s", e)
