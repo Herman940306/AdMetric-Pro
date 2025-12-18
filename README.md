@@ -29,6 +29,18 @@ python -m src.main path/to/meta_export.csv
 - Executive Summary sheet with totals and averages
 - Timestamped filenames to preserve report history
 
+## See it in Action
+
+### Campaign Details Report
+Red highlighting automatically flags campaigns with CPC > R20.00 — no manual formatting required.
+
+![Campaign Details Preview](docs/assets/report_preview.png)
+
+### Executive Summary Dashboard
+One-glance overview of total spend, clicks, impressions, and key performance metrics.
+
+![Executive Summary Preview](docs/assets/dashboard_preview.png)
+
 ## Features
 
 | Feature | Benefit |
@@ -38,6 +50,7 @@ python -m src.main path/to/meta_export.csv
 | **Conditional Formatting** | High-cost campaigns highlighted in red |
 | **Executive Summary** | One-page overview for busy clients |
 | **Timestamped Output** | Never overwrite previous reports |
+| **Custom CPC Threshold** | Set your own red flag limit with `--cpc-threshold` |
 
 ## Installation
 
@@ -62,6 +75,12 @@ python -m src.main path/to/your/meta_ads_export.csv
 
 ```bash
 python -m src.main path/to/meta_ads_export.csv --output reports/
+```
+
+### With Custom CPC Threshold
+
+```bash
+python -m src.main path/to/meta_ads_export.csv --cpc-threshold 25.00
 ```
 
 ### Expected CSV Columns

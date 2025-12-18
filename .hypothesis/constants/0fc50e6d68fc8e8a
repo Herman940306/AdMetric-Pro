@@ -1,0 +1,4 @@
+# file: F:\Marketing-Automation-Tools\AdMetric Pro\src\main.py
+# hypothesis_version: 6.148.7
+
+['%Y-%m-%d %H:%M:%S', '--cpc-threshold', '--output', '--verbose', '-o', '-t', '-v', '=', 'AdMetric Pro', 'Average CPC: R%.2f', 'File not found: %s', 'Full traceback:', 'Total Spend: R%.2f', 'Unexpected error: %s', '__main__', 'amount_spent', 'cpc', 'input_file', 'output', 'store_true']
