@@ -123,6 +123,29 @@ AdMetric-Pro/
 └── requirements.txt
 ```
 
+## Design Decisions & Technical Choices
+
+### Why openpyxl?
+
+We chose **openpyxl** over alternatives like xlsxwriter for its superior styling capabilities:
+- Native support for conditional formatting rules
+- Fine-grained control over cell colors, fonts, and borders
+- Ability to read and modify existing Excel files
+- Active maintenance and excellent documentation
+
+### Why R20.00 as the Default CPC Threshold?
+
+The R20.00 threshold is based on South African digital advertising benchmarks:
+- Average CPC for Facebook Ads in SA ranges from R5-R15 for most industries
+- Campaigns exceeding R20.00 CPC typically indicate targeting issues or low-quality traffic
+- This threshold can be customized via `--cpc-threshold` for different industries
+
+### Architecture Decisions
+
+- **Modular Design**: Separate modules for CSV reading, metrics calculation, and Excel formatting allow independent testing and future extensibility
+- **Property-Based Testing**: Using Hypothesis for comprehensive edge case coverage (zero-division, data preservation)
+- **Logging + Print**: Detailed logging for debugging, clean terminal output for end-users
+
 ## License
 
 MIT License - Built for the Cape Town marketing community.

@@ -1,0 +1,4 @@
+# file: F:\Marketing-Automation-Tools\AdMetric Pro\src\generate_visuals.py
+# hypothesis_version: 6.148.7
+
+[0.5, 20.0, 100, 300, 450, 500, 900, '#1F4E79', '#2E75B6', '#333333', '#D6DCE4', '#FFC7CE', '#FFFFFF', '%(message)s', '<b>CPC (ZAR)</b>', '<b>CTR</b>', '<b>Campaign Name</b>', '<b>Clicks</b>', '<b>Impressions</b>', '<b>Metric</b>', '<b>Spend (ZAR)</b>', '<b>Value</b>', '=', 'Average CPC', 'Loading mock data...', 'Overall CTR', 'Saved: %s', 'Total Clicks', 'Total Impressions', 'Total Spend', 'Unexpected error: %s', '__main__', 'amount_spent', 'campaign_name', 'center', 'cpc', 'ctr', 'docs/assets', 'impressions', 'left', 'link_clicks', 'report_preview.png', 'right']

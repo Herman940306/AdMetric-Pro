@@ -141,22 +141,39 @@ def main() -> int:
             excel_formatter.CPC_THRESHOLD = args.cpc_threshold
             logger.info("Using custom CPC threshold: R%.2f", args.cpc_threshold)
 
+        # Check for empty data
+        if len(df_with_metrics) == 0:
+            print("\n" + "=" * 60)
+            print("[WARNING] No campaigns found in file.")
+            print("Please check your Meta export and ensure it contains data.")
+            print("=" * 60)
+            return 1
+
         report_path = generate_report(df_with_metrics, args.output)
 
-        logger.info("=" * 60)
-        logger.info("SUCCESS! Report generated: %s", report_path)
-        logger.info("=" * 60)
+        # Print Success Summary to terminal
+        print("\n" + "=" * 60)
+        print(f"[SUCCESS] Report generated: {Path(report_path).name}")
+        print(f"[SUMMARY] {len(df_with_metrics)} Campaigns processed. {high_cpc_count} Red Flags found.")
+        print("=" * 60)
+        print(f"\nOutput: {report_path}")
 
         return 0
 
     except FileNotFoundError as e:
-        logger.error("File not found: %s", e)
+        print(f"\n[ERROR] File not found: {e}")
+        print("Please check the file path and try again.")
         return 1
     except ValueError as e:
-        logger.error("Data validation error: %s", e)
+        print(f"\n[ERROR] Data validation error: {e}")
+        print("Please ensure your CSV has the required columns:")
+        print("  - Campaign Name")
+        print("  - Amount Spent (ZAR)")
+        print("  - Link Clicks")
+        print("  - Impressions")
         return 1
     except IOError as e:
-        logger.error("Failed to write report: %s", e)
+        print(f"\n[ERROR] Failed to write report: {e}")
         return 1
     except Exception as e:
         logger.error("Unexpected error: %s", e)
