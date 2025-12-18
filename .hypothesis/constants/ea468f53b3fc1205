@@ -1,0 +1,4 @@
+# file: F:\Marketing-Automation-Tools\AdMetric Pro\src\metrics.py
+# hypothesis_version: 6.148.7
+
+[0.0, 100, 'amount_spent', 'cpc', 'ctr', 'impressions', 'link_clicks']

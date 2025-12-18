@@ -48,23 +48,30 @@
     - Test valid CSV loading
     - Test missing file handling
     - Test missing column handling
+
+
     - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2_
 
 - [ ] 3. Checkpoint - Review CSV Reader
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 4. Implement Metrics Calculator module
-  - [ ] 4.1 Create src/metrics.py with CTR and CPC calculations
+- [x] 4. Implement Metrics Calculator module
+
+  - [x] 4.1 Create src/metrics.py with CTR and CPC calculations
+
     - Implement calculate_ctr function with zero-division protection
     - Implement calculate_cpc function with zero-division protection
     - Implement add_metrics_to_dataframe function
     - _Requirements: 3.1, 3.2, 3.3, 3.4_
-  - [ ]* 4.2 Write property test for CTR calculation
+  - [x]* 4.2 Write property test for CTR calculation
+
     - **Property 2: CTR Calculation Correctness**
     - **Validates: Requirements 3.1, 3.3**
+
   - [ ]* 4.3 Write property test for CPC calculation
     - **Property 3: CPC Calculation Correctness**
     - **Validates: Requirements 3.2, 3.4**
+
   - [ ]* 4.4 Write unit tests for metrics module
     - Test CTR with known values
     - Test CPC with known values
