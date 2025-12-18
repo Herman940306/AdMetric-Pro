@@ -133,6 +133,7 @@
 
 
 
+
     - Test currency formatting applied
     - Test conditional formatting threshold
     - Test Executive Summary creation

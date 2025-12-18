@@ -27,11 +27,30 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def parse_arguments() -> argparse.Namespace:
-    """Parse command-line arguments.
+def parse_arguments(args: list[str] | None = None) -> argparse.Namespace:
+    """Parse command-line arguments for AdMetric Pro CLI.
+
+    Configures and parses arguments for the report generation pipeline,
+    including input file path, output directory, CPC threshold, and
+    verbosity settings.
+
+    Args:
+        args: List of command-line arguments to parse. If None, uses sys.argv.
+            Primarily used for testing purposes.
 
     Returns:
-        Namespace containing parsed arguments.
+        Namespace containing parsed arguments with attributes:
+            - input_file (str): Path to the Meta Ads CSV file.
+            - output (str): Output directory for the Excel report.
+            - cpc_threshold (float): CPC threshold for red highlighting.
+            - verbose (bool): Whether to enable verbose logging.
+
+    Example:
+        >>> args = parse_arguments(["data/meta_ads.csv", "--output", "reports/"])
+        >>> args.input_file
+        'data/meta_ads.csv'
+        >>> args.output
+        'reports/'
     """
     parser = argparse.ArgumentParser(
         prog="AdMetric Pro",
@@ -65,7 +84,7 @@ def parse_arguments() -> argparse.Namespace:
         help="Enable verbose logging output."
     )
 
-    return parser.parse_args()
+    return parser.parse_args(args)
 
 
 def main() -> int:
