@@ -11,7 +11,8 @@
 
 ---
 
-## The Problem
+## The Problem:
+"From an engineering perspective, this introduces recurring risks around data integrity, inconsistent schemas, and silent calculation errors at scale."
 
 Every week, your team exports campaign data from Meta Ads Manager. Then comes the tedious part:
 
@@ -24,7 +25,14 @@ Every week, your team exports campaign data from Meta Ads Manager. Then comes th
 
 ## The Solution
 
-One command. Professional reports. Happy clients.
+What This Project Demonstrates
+
+• Production-grade data ingestion with strict schema validation  
+• Deterministic metric computation under incomplete and inconsistent datasets  
+• Defensive programming for financial and performance metrics  
+• CLI-based automation suitable for scheduled and CI-driven pipelines  
+• Test-driven development with property-based testing for edge cases  
+• Clean separation of concerns (ingestion, computation, presentation)
 
 ```bash
 python -m src.main path/to/meta_export.csv
@@ -53,7 +61,7 @@ One-glance overview of total spend, clicks, impressions, and key performance met
 
 ---
 
-## Key Features
+## System Capabilities
 
 | Feature | Business Value |
 |---------|----------------|
